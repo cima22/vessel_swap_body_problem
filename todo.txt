@@ -1,0 +1,5 @@
+- write other instances
+- write test notebook with variuos tests
+- write comments/docstrings
+- check the code
+- write guide

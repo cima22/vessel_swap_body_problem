@@ -690,6 +690,12 @@ class vsbp:
         for b in range(self.n_bodies):
             print("Body: {:3} - start location: {}".format(b,self.Bodies["start_location"][b]))
         for r in range(self.n_requests):
+            output = "Request " + str(r) + ":"
+            output += " pickup time window is [" + str(self.Requests["pickup_from"][r]) + ", " + str(self.Requests["pickup_to"][r]) + "]" if self.Requests["pickup_location"][r] != -1 else ""
+            output += " delivery time window is [" + str(self.Requests["delivery_from"][r]) + ", " + str(self.Requests["delivery_to"][r]) + "]" if self.Requests["delivery_location"][r] != -1 else ""
+            print(output)
+        print("\n------------------------ Solution: ---------------------------------\n")    
+        for r in range(self.n_requests):
             if(self.gamma_r[r].x == 0):
                 print("Request",r,"outsourced by trucks!")
                 continue
@@ -701,17 +707,17 @@ class vsbp:
 
             if r_p_l == -1:
                 r_b   = self.Requests["at_body "][r]
-                r_d_t = round(self.tau_a_b[r_b][r_d_node].x,2)
+                r_d_t = round(self.tau_d_b[r_b][r_d_node].x,2)
                 print("Request",r,"handled by body",r_b,"- Delivery at location",r_d_l,"at",r_d_t)
                 continue
 
             for b in range(self.n_bodies):
                 if self.x_br[r][b][self.A.select(r_p_node,r_p_copy_node)[0]].x == 1:
-                    r_p_t = round(self.tau_a_b[b][r_p_node].x,2)
+                    r_p_t = round(self.tau_d_b[b][r_p_node].x,2)
                     if r_d_l == -1:            
                         print("Request",r,"handled by body",r_b,"- Pickup at location",r_p_l,"at",r_p_t)
                         continue
-                    r_d_t = round(self.tau_a_b[b][r_d_node].x,2)
+                    r_d_t = round(self.tau_d_b[b][r_d_node].x,2)
                     print("Request",r,"handled by body",b,"- Pickup at location",r_p_l,"at",r_p_t," - Delivery at location",r_d_l,"at",r_d_t)
 
     def _location_paths(self,index,is_vessels,timing=False):
@@ -733,4 +739,3 @@ class vsbp:
         if timing:
             return path_locations,timings
         return path_locations
-
