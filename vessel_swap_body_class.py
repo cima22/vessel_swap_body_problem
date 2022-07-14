@@ -10,29 +10,30 @@ import random
 
 class vsbp:
     
-    def __init__(self, instance_folder = None, name = "vessel swap body routing problem"):
+    """Class that represents the vessel swap-body problem. It contains methods to solve the problem from instances read from csv files and to plot the solutions."""
+    
+    def __init__(self, instance_folder, name = "vessel swap body routing problem"):
+        """Init function which reads from csv files the parameters of the problem."""
         self.instance_folder = instance_folder
-        self._get_dimensions()
         self._get_instance()
         self.opt_mod = Model(name = name)    
     
-    def _get_dimensions(self):
+    def _get_instance(self):
+        """Reads the instance of the problem from csv files."""
+        self.Nodes      = pd.read_csv(self.instance_folder + "/nodes.csv")
+        self.Vessels    = pd.read_csv(self.instance_folder + "/vessels.csv")
+        self.Bodies     = pd.read_csv(self.instance_folder + "/bodies.csv")
+        self.Requests   = pd.read_csv(self.instance_folder + "/requests.csv")
+        self.Params     = pd.read_csv(self.instance_folder + "/params.csv")
+        self.Distances  = pd.read_csv(self.instance_folder + "/distances.csv").to_numpy() 
         self.Params     = pd.read_csv(self.instance_folder + "/params.csv")
         self.n_nodes    = self.Params["total_number_of_nodes"][0]
         self.n_vessels  = self.Params["total_number_of_vessels"][0]
         self.n_bodies   = self.Params["total_number_of_bodies"][0]
-        self.n_requests = self.Params["total_number_of_requests"][0]
-
-    def _get_instance(self):
-        self.Nodes     = pd.read_csv(self.instance_folder + "/nodes.csv")
-        self.Vessels   = pd.read_csv(self.instance_folder + "/vessels.csv")
-        self.Bodies    = pd.read_csv(self.instance_folder + "/bodies.csv")
-        self.Requests  = pd.read_csv(self.instance_folder + "/requests.csv")
-        self.Params    = pd.read_csv(self.instance_folder + "/params.csv")
-        self.Distances = pd.read_csv(self.instance_folder + "/distances.csv").to_numpy() 
+        self.n_requests = self.Params["total_number_of_requests"][0]  
     
-    def solve_vsbr(self,gap=.1,plot=True):
-        
+    def solve_vsbr(self,gap=.1,time_limit=None):
+        """Generates the formulation of the problem and solves the instance. The relative gap between the lower and upper objective bound can be setted (default is 10%); the time limit in seconds che also be specified (if not specified, there is no time limit)."""
         ########## Generating network nodes ##########################################
 
         self._generate_network_nodes()
@@ -86,6 +87,8 @@ class vsbp:
 
         self.opt_mod.update()
         self.opt_mod.Params.MIPGap=gap
+        if time_limit is not None:
+            self.opt_mod.Params.TimeLimit = time_limit
         self.opt_mod.optimize()
         print(f'Objective Function Value: {self.opt_mod.objVal}')    
     
@@ -659,7 +662,10 @@ class vsbp:
         self._print_information()
         plt.legend(handles=patches)
         plt.show()
-        
+    
+    def print_solution(self):
+        self._print_information()
+
     def _get_shared_routes(self,vessel,body):
         arcs = self.omega_bv[vessel][body]
         locs = []
@@ -685,16 +691,22 @@ class vsbp:
             nx.draw_networkx_edges(G,pos,edgelist=[arc],width = 3,connectionstyle=style, edge_color=colors[self.n_bodies * is_vessels + i],style="dashed")
 
     def _print_information(self):
+        
+        print("\n------------------------ Instance problem: ---------------------------------\n")    
         for v in range(self.n_vessels):
             print("Vessel: {:1} - start location: {}".format(v,self.Vessels["start_location"][v]))
+        print()    
         for b in range(self.n_bodies):
             print("Body: {:3} - start location: {}".format(b,self.Bodies["start_location"][b]))
+        print()
         for r in range(self.n_requests):
             output = "Request " + str(r) + ":"
             output += " pickup time window is [" + str(self.Requests["pickup_from"][r]) + ", " + str(self.Requests["pickup_to"][r]) + "]" if self.Requests["pickup_location"][r] != -1 else ""
             output += " delivery time window is [" + str(self.Requests["delivery_from"][r]) + ", " + str(self.Requests["delivery_to"][r]) + "]" if self.Requests["delivery_location"][r] != -1 else ""
             print(output)
-        print("\n------------------------ Solution: ---------------------------------\n")    
+            
+        print("\n---------------------------- Solution: -------------------------------------\n")
+        print(f'Objective Function Value: {round(self.opt_mod.objVal,2)}\n')    
         for r in range(self.n_requests):
             if(self.gamma_r[r].x == 0):
                 print("Request",r,"outsourced by trucks!")
@@ -706,7 +718,7 @@ class vsbp:
             r_d_node = "D_" + str(r + 2 * self.n_requests)
 
             if r_p_l == -1:
-                r_b   = self.Requests["at_body "][r]
+                r_b   = self.Requests["at_body"][r]
                 r_d_t = round(self.tau_d_b[r_b][r_d_node].x,2)
                 print("Request",r,"handled by body",r_b,"- Delivery at location",r_d_l,"at",r_d_t)
                 continue

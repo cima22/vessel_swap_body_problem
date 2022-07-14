@@ -1,0 +1,4 @@
+Request,pickup_location,pickup_from,pickup_to,delivery_location,delivery_from,delivery_to,num_containers,at_body
+0,-1,-1,-1,2,18493,20635,6,1
+1,-1,-1,-1,0,5156,9389,2,0
+2,0,14080,16655,3,25624,29320,15,-1

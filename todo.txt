@@ -1,5 +1,5 @@
 - write other instances
-- write test notebook with variuos tests
-- write comments/docstrings
+- write test notebook with various tests
 - check the code
 - write guide
+- analyze scalability in terms of number of bodies/vessels/locations and number of requests
