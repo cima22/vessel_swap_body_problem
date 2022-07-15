@@ -1,5 +1,5 @@
 # Vessel swap-body problem
-In this directory there are:
+In this directory there are present:
 
 - vessel_swap_body_class.py: a python class representing the vessel swap body problem
 - test.ipynp: a jupyter notebook that tests the class with two instances
