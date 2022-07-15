@@ -93,12 +93,12 @@ class vsbp:
         print(f'Objective Function Value: {self.opt_mod.objVal}')    
     
     def _generate_network_nodes(self):
-        self.nodes_requests      = {}
-        self.nodes_locations     = {}
-        self.Pickup_nodes        = []
-        self.Pickup_nodes_copy   = []
-        self.Delivery_nodes      = []
-        self.Delivery_nodes_copy = []
+        self.nodes_requests      = {} # maps every service node to its corresponding request
+        self.nodes_locations     = {} # maps every node to its physical location
+        self.Pickup_nodes        = [] # P
+        self.Pickup_nodes_copy   = [] # P'
+        self.Delivery_nodes      = [] # D
+        self.Delivery_nodes_copy = [] # D'
 
         for i in range(self.n_requests):
             if(self.Requests["pickup_location"][i] != -1):
@@ -223,12 +223,11 @@ class vsbp:
     def _generate_travel_times(self):
         self.travel_time = {}
         for dep,arr in self.A:
-            time = self.Distances[self.nodes_locations[dep]][self.nodes_locations[arr]] / self.Params["speed"][0] if self.nodes_locations[arr] != -1 else 0
+            time = self.Distances[self.nodes_locations[dep]][self.nodes_locations[arr]] / self.Params["speed"][0] if self.nodes_locations[arr] != -1 else 0 
 
             if(dep in self.I and arr in self.I and self.nodes_requests[dep] == self.nodes_requests[arr]):
-                service_time = self.Params["coupling_time"][0] if self.A_1.select(dep,arr) else self.Params["decoupling_time"][0]
                 r = self.nodes_requests[dep]
-                time = service_time * self.Requests["num_containers"][r]
+                time = self.Params["service_time"][0] * self.Requests["num_containers"][r]
 
             self.travel_time[(dep,arr)] = time
         
@@ -272,7 +271,7 @@ class vsbp:
 
         for b in range(self.n_bodies):
             self.delta_b.append({})
-            for arc in self.A:
+            for arc in self.A_D:
                 self.delta_b[b][arc] = self.opt_mod.addVar(name = "delta_" + str(b) + "_(" + arc[0] + "," + arc[1] + ")", vtype = GRB.BINARY)
 
         for r in range(self.n_requests):
@@ -637,7 +636,8 @@ class vsbp:
                                             for b in range(self.n_bodies)) == 0)
         
     def plot_solution(self):
-        colors = [x for x in mcd.TABLEAU_COLORS.values()]
+        colors = [x for x in list(mcd.TABLEAU_COLORS.values()) + list(mcd.XKCD_COLORS.values())]
+        
         G = nx.MultiDiGraph()
         for is_vessels in [0,1]:
             n = self.n_vessels if is_vessels else self.n_bodies
