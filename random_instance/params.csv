@@ -1,2 +1,2 @@
 speed,coupling_time,decoupling_time,body_capacity,max_bodies,total_number_of_nodes,total_number_of_vessels,total_number_of_bodies,total_number_of_requests,unscheduled_cost_coefficient,service_time
-333,15,15,50,3,7,3,3,4,10000,2
+333,15,15,50,3,8,2,4,3,10000,2
