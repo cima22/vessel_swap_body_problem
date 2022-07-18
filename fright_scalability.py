@@ -47,10 +47,10 @@ def requests():
         n_requests = 1
         for i in range(3):
             instances.append([n_nodes,n_vessels,n_bodies,n_requests])
-            #n_nodes    += 2
-            #n_vessels  += 1 if i < 1 else 0
-            #n_bodies   += 1 if i < 2 else 0
-            #n_requests += 1
+            n_nodes    += 2
+            n_vessels  += 1 if i < 1 else 0
+            n_bodies   += 1 if i < 2 else 0
+            n_requests += 1
         for i in range(3):
             times = []
             for _ in range(5):
