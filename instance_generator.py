@@ -46,9 +46,11 @@ def generate_instance(n_nodes,n_vessels,n_bodies,n_requests):
     with open(directory + "/nodes.csv","w") as f:
         writer = csv.writer(f)
         writer.writerow(["Node","is_client"])
-        for i in range(n_nodes):
-            is_client = -2 if ri(0,1,.2) < 0 else 1
-            Nodes.append([i,is_client])
+        while len([n for n in Nodes if n[1] != -2]) < 2: # generate nodes until there are at least two client locations
+            Nodes = []
+            for i in range(n_nodes):
+                is_client = -2 if ri(0,1,.2) < 0 else 1
+                Nodes.append([i,is_client])
         writer.writerows(Nodes)
     
     with open(directory + "/vessels.csv","w") as f:
