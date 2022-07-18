@@ -41,17 +41,15 @@ def requests():
         w = csv.writer(f)
         w.writerow(["n_nodes","n_vessels","n_bodies","n_requests","avg_time","std_dev"])
         instances = []
-        n_nodes   = 2
+        n_nodes   = 5
         n_vessels = 2
         n_bodies  = 2
         n_requests = 1
-        for i in range(4):
+        for i in range(5):
             instances.append([n_nodes,n_vessels,n_bodies,n_requests])
             n_nodes    += 2
-            n_vessels  += 1 if i < 1 else 0
-            n_bodies   += 1 if i < 2 else 0
             n_requests += 1
-        for i in range(3,4):
+        for i in range(5):
             times = []
             for _ in range(5):
                 generate_instance(*instances[i])
@@ -62,8 +60,8 @@ def requests():
             std = np.std(times,ddof = 1)
             w.writerow(instances[i] + [avg,std])
 
-#requests()
-freight()
+requests()
+#freight()
 
 with open("times.txt","a") as f:
     now = datetime.now()
